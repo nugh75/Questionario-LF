@@ -1,0 +1,76 @@
+# File di sistema macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails Mac
+._*
+
+# File generati da Spotlight
+.Spotlight-V100/
+.Trashes/
+
+# File generati dal Finder
+.fseventsd/
+.VolumeIcon.icns
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# Virtual environment Python
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Dipendenze installate
+Pipfile
+Pipfile.lock
+poetry.lock
+
+# File di log e database temporanei
+*.log
+*.sqlite3
+*.db
+*.pdb
+
+# Configurazioni locali ed eseguibili
+*.swp
+*.swo
+*.bak
+*.orig
+*.rej
+*.tmp
+*.~*
+*.egg-info/
+*.eggs/
+*.manifest
+*.spec
+
+# Cartelle di build e distribuzione
+build/
+dist/
+*.egg
+*.wheel
+
+# File di test e coverage
+.coverage
+.tox/
+.nox/
+htmlcov/
+pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+
+# Configurazioni di editor e IDE
+.vscode/
+.idea/
+*.iml
+*.sublime-project
+*.sublime-workspace
+
+# File di cache di Jupyter Notebook
+.ipynb_checkpoints/

@@ -1,0 +1,81 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+<div class="mdl-card mdl-shadow--2dp" style="width: 100%;">
+    <div class="mdl-card__title">
+        <h2 class="mdl-card__title-text">Gestione Feedback #{{ risposta.id }}</h2>
+    </div>
+    <div class="mdl-card__supporting-text">
+        <p><strong>Data compilazione:</strong> {{ risposta.timestamp.strftime('%d/%m/%Y %H:%M') }}</p>
+        
+        <h4>Punteggi per Area</h4>
+        <table class="mdl-data-table mdl-js-data-table" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th class="mdl-data-table__cell--non-numeric">Area</th>
+                    <th>Punteggio</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">Motivazione</td>
+                    <td>{{ medie.motivazione|round(2) }}</td>
+                </tr>
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">Uso delle Risorse Accademiche</td>
+                    <td>{{ medie.risorse|round(2) }}</td>
+                </tr>
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">Elaborazione delle Informazioni</td>
+                    <td>{{ medie.elaborazione|round(2) }}</td>
+                </tr>
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">Gestione del Tempo</td>
+                    <td>{{ medie.tempo|round(2) }}</td>
+                </tr>
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">Strategie per Svolgere Prove</td>
+                    <td>{{ medie.strategie|round(2) }}</td>
+                </tr>
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">Concentrazione</td>
+                    <td>{{ medie.concentrazione|round(2) }}</td>
+                </tr>
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">Selezione dei Concetti Principali</td>
+                    <td>{{ medie.selezione|round(2) }}</td>
+                </tr>
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">Atteggiamento</td>
+                    <td>{{ medie.atteggiamento|round(2) }}</td>
+                </tr>
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">Auto-Monitoraggio</td>
+                    <td>{{ medie.monitoraggio|round(2) }}</td>
+                </tr>
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">Ansia</td>
+                    <td>{{ medie.ansia|round(2) }}</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h4>Aggiungi/Modifica Feedback</h4>
+        <form method="post">
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width: 100%;">
+                <textarea class="mdl-textfield__input" type="text" rows="6" id="feedback" name="feedback">{{ risposta.feedback }}</textarea>
+                <label class="mdl-textfield__label" for="feedback">Inserisci il feedback personalizzato...</label>
+            </div>
+            
+            <div style="margin-top: 16px;">
+                <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
+                    Salva Feedback
+                </button>
+                <a href="{{ url_for('admin_dashboard') }}" class="mdl-button mdl-js-button mdl-button--raised">
+                    Annulla
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

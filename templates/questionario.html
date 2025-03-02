@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questionario di Autovalutazione dello Studio</title>
+    
+    <!-- Material Design Lite -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue-light_blue.min.css">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    
+    <style>
+        .page-content {
+            padding: 24px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .mdl-layout__header {
+            background-color: #1976D2;
+        }
+        
+        .mdl-card {
+            width: 100%;
+            min-height: 0;
+            margin-bottom: 24px;
+        }
+        
+        .mdl-card__title {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .question-container {
+            padding: 16px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .question-text {
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+        
+        .likert-scale {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .likert-option {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .likert-label {
+            font-size: 12px;
+            margin-top: 4px;
+            color: rgba(0,0,0,0.54);
+        }
+        
+        .section-spacer {
+            margin: 32px 0;
+        }
+        
+        .animate-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .instructions {
+            padding: 16px;
+            background-color: #E3F2FD;
+            border-radius: 4px;
+            margin-bottom: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+        <header class="mdl-layout__header">
+            <div class="mdl-layout__header-row">
+                <i class="material-icons">school</i>
+                <span class="mdl-layout-title">&nbsp;Questionario di Autovalutazione dello Studio</span>
+            </div>
+        </header>
+        
+        <main class="mdl-layout__content">
+            <div class="page-content animate-in">
+                <div class="instructions mdl-shadow--2dp">
+                    <h4>Istruzioni</h4>
+                    <p>Cerca di rispondere in base a quanto bene ogni affermazione ti descrive, non come pensi che dovresti essere o come si comportano gli altri. Non ci sono risposte giuste o sbagliate.</p>
+                    <p>Per ogni domanda, seleziona un valore da 1 a 5 dove:</p>
+                    <ul>
+                        <li>1 = Per niente vero</li>
+                        <li>2 = Poco vero</li>
+                        <li>3 = Abbastanza vero</li>
+                        <li>4 = Molto vero</li>
+                        <li>5 = Totalmente vero</li>
+                    </ul>
+                </div>
+                
+                <form method="post" id="questionarioForm">
+                    <div class="mdl-card mdl-shadow--2dp">
+                        <div class="mdl-card__title">
+                            <h2 class="mdl-card__title-text">Domande</h2>
+                        </div>
+                        <div class="mdl-card__supporting-text">
+                            {% for domanda in domande %}
+                            <div class="question-container">
+                                <div class="question-text">
+                                    {{ domanda.ordine }}. {{ domanda.testo }}
+                                </div>
+                                <div class="likert-scale">
+                                    {% for i in range(1, 6) %}
+                                    <div class="likert-option">
+                                        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="q{{ domanda.ordine }}_{{ i }}">
+                                            <input type="radio" id="q{{ domanda.ordine }}_{{ i }}" 
+                                                   name="q{{ domanda.ordine }}" 
+                                                   value="{{ i }}" 
+                                                   class="mdl-radio__button" required>
+                                            <span class="mdl-radio__label">{{ i }}</span>
+                                        </label>
+                                        <div class="likert-label">
+                                            {% if i == 1 %}Per niente vero
+                                            {% elif i == 2 %}Poco vero
+                                            {% elif i == 3 %}Abbastanza vero
+                                            {% elif i == 4 %}Molto vero
+                                            {% elif i == 5 %}Totalmente vero
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Pulsanti di navigazione -->
+                    <div class="section-spacer">
+                        <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
+                            Invia Questionario
+                        </button>
+                        <button type="button" id="salvaProgresso" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect">
+                            Salva Progresso
+                        </button>
+                        <button type="reset" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+                            Cancella Risposte
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        document.getElementById('questionarioForm').addEventListener('submit', function(e) {
+            let questions = document.querySelectorAll('.question-container');
+            let unanswered = [];
+            
+            questions.forEach((question, index) => {
+                let answered = question.querySelector('input[type="radio"]:checked');
+                if (!answered) {
+                    unanswered.push(index + 1);
+                }
+            });
+            
+            if (unanswered.length > 0) {
+                e.preventDefault();
+                alert('Per favore, rispondi a tutte le domande. Mancano le risposte alle domande: ' + unanswered.join(', '));
+            }
+        });
+        
+        // Aggiungo script per salvare le risposte localmente
+        document.getElementById('salvaProgresso').addEventListener('click', function() {
+            let form = document.getElementById('questionarioForm');
+            let formData = new FormData(form);
+            let answers = {};
+            
+            // Raccoglie tutte le risposte dal form
+            for (let [key, value] of formData.entries()) {
+                answers[key] = value;
+            }
+            
+            // Salva nel localStorage
+            localStorage.setItem('questionarioProgress', JSON.stringify(answers));
+            
+            // Mostra conferma all'utente
+            let snackbarContainer = document.querySelector('#snackbar');
+            if (!snackbarContainer) {
+                snackbarContainer = document.createElement('div');
+                snackbarContainer.id = 'snackbar';
+                snackbarContainer.className = 'mdl-js-snackbar mdl-snackbar';
+                snackbarContainer.innerHTML = `
+                    <div class="mdl-snackbar__text"></div>
+                    <button class="mdl-snackbar__action" type="button"></button>
+                `;
+                document.body.appendChild(snackbarContainer);
+                componentHandler.upgradeElement(snackbarContainer);
+            }
+            
+            snackbarContainer.MaterialSnackbar.showSnackbar({
+                message: 'Progresso salvato localmente.',
+                timeout: 2000
+            });
+        });
+        
+        // Carica le risposte salvate quando la pagina viene caricata
+        window.addEventListener('load', function() {
+            let savedProgress = localStorage.getItem('questionarioProgress');
+            if (savedProgress) {
+                let answers = JSON.parse(savedProgress);
+                for (let key in answers) {
+                    let input = document.querySelector(`input[name="${key}"][value="${answers[key]}"]`);
+                    if (input) {
+                        input.checked = true;
+                        componentHandler.upgradeElement(input.parentElement);
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

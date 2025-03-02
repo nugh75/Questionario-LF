@@ -1,0 +1,131 @@
+{% extends "admin/dashboard.html" %}
+
+{% block content %}
+<div class="mdl-grid">
+    <div class="mdl-cell mdl-cell--12-col">
+        <div class="mdl-card mdl-shadow--2dp" style="width: 100%;">
+            <div class="mdl-card__title">
+                <h2 class="mdl-card__title-text">Gestione Domande</h2>
+            </div>
+            <div class="mdl-card__supporting-text">
+                <!-- Form per aggiungere/modificare domanda -->
+                <form method="POST" id="domandaForm">
+                    <input type="hidden" name="azione" id="azione" value="aggiungi">
+                    <input type="hidden" name="domanda_id" id="domanda_id">
+                    
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width: 100%;">
+                        <input class="mdl-textfield__input" type="number" id="ordine" name="ordine" required>
+                        <label class="mdl-textfield__label" for="ordine">Numero domanda</label>
+                    </div>
+
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width: 100%;">
+                        <textarea class="mdl-textfield__input" type="text" rows="3" id="testo" name="testo" required></textarea>
+                        <label class="mdl-textfield__label" for="testo">Testo della domanda</label>
+                    </div>
+
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width: 100%;">
+                        <input class="mdl-textfield__input" type="text" id="etichetta" name="etichetta">
+                        <label class="mdl-textfield__label" for="etichetta">Etichetta (opzionale)</label>
+                    </div>
+
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width: 100%;">
+                        <select class="mdl-textfield__input" id="area" name="area" required>
+                            <option value="">Seleziona un'area</option>
+                            {% for area in aree %}
+                            <option value="{{ area }}">{{ area }}</option>
+                            {% endfor %}
+                        </select>
+                        <label class="mdl-textfield__label" for="area">Area</label>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
+                        Aggiungi Domanda
+                    </button>
+                    <button type="button" id="resetBtn" class="mdl-button mdl-js-button mdl-button--raised">
+                        Annulla
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="mdl-cell mdl-cell--12-col">
+        <div class="mdl-card mdl-shadow--2dp" style="width: 100%;">
+            <div class="mdl-card__title">
+                <h2 class="mdl-card__title-text">Elenco Domande</h2>
+            </div>
+            <div class="mdl-card__supporting-text">
+                <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th class="mdl-data-table__cell--non-numeric">N°</th>
+                            <th class="mdl-data-table__cell--non-numeric">Testo</th>
+                            <th class="mdl-data-table__cell--non-numeric">Area</th>
+                            <th class="mdl-data-table__cell--non-numeric">Etichetta</th>
+                            <th class="mdl-data-table__cell--non-numeric">Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for domanda in domande %}
+                        <tr>
+                            <td class="mdl-data-table__cell--non-numeric">{{ domanda.ordine }}</td>
+                            <td class="mdl-data-table__cell--non-numeric">{{ domanda.testo }}</td>
+                            <td class="mdl-data-table__cell--non-numeric">{{ domanda.area }}</td>
+                            <td class="mdl-data-table__cell--non-numeric">{{ domanda.etichetta or '' }}</td>
+                            <td class="mdl-data-table__cell--non-numeric">
+                                <button class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored"
+                                        onclick="editDomanda('{{ domanda.id }}', '{{ domanda.ordine }}', '{{ domanda.testo|replace("'", "\\'") }}', '{{ domanda.area }}', '{{ domanda.etichetta|default('')|replace("'", "\\'") }}')">
+                                    <i class="material-icons">edit</i>
+                                </button>
+                                <button class="mdl-button mdl-js-button mdl-button--icon mdl-button--accent"
+                                        onclick="deleteDomanda('{{ domanda.id }}')">
+                                    <i class="material-icons">delete</i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function editDomanda(id, ordine, testo, area, etichetta) {
+    document.getElementById('azione').value = 'modifica';
+    document.getElementById('domanda_id').value = id;
+    document.getElementById('ordine').value = ordine;
+    document.getElementById('testo').value = testo;
+    document.getElementById('area').value = area;
+    document.getElementById('etichetta').value = etichetta;
+    document.getElementById('submitBtn').textContent = 'Modifica Domanda';
+    
+    // Aggiorna gli elementi MDL
+    componentHandler.upgradeElements(document.querySelectorAll('.mdl-textfield'));
+}
+
+function deleteDomanda(id) {
+    if (confirm('Sei sicuro di voler eliminare questa domanda?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.innerHTML = `
+            <input type="hidden" name="azione" value="elimina">
+            <input type="hidden" name="domanda_id" value="${id}">
+        `;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+document.getElementById('resetBtn').addEventListener('click', function() {
+    document.getElementById('azione').value = 'aggiungi';
+    document.getElementById('domanda_id').value = '';
+    document.getElementById('domandaForm').reset();
+    document.getElementById('submitBtn').textContent = 'Aggiungi Domanda';
+    
+    // Aggiorna gli elementi MDL
+    componentHandler.upgradeElements(document.querySelectorAll('.mdl-textfield'));
+});
+</script>
+{% endblock %}

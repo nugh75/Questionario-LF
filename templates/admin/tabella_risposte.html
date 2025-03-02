@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabella Risposte Questionario</title>
+    
+    <!-- Material Design Lite -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue-light_blue.min.css">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedcolumns/4.0.1/js/dataTables.fixedColumns.min.js"></script>
+    
+    <style>
+        .page-content {
+            padding: 24px;
+            max-width: 100%;
+            margin: 0 auto;
+            overflow-x: auto;
+        }
+        
+        .mdl-layout__header {
+            background-color: #1976D2;
+        }
+        
+        .mdl-card {
+            width: 100%;
+            min-height: 0;
+            margin-bottom: 24px;
+            overflow: visible;
+        }
+        
+        .mdl-card__title {
+            background-color: #1976D2;
+            color: white;
+        }
+        
+        .action-buttons {
+            margin: 16px 0;
+        }
+        
+        .dataTables_wrapper {
+            margin-top: 20px;
+            width: 100%;
+            overflow-x: auto;
+        }
+        
+        table.dataTable {
+            width: 100% !important;
+        }
+        
+        /* Stili per le tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dotted black;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 300px;
+            background-color: #555;
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -150px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Stili per i colori delle aree */
+        .area-motivazione {
+            background-color: rgba(255, 99, 132, 0.2) !important;
+        }
+        .area-risorse {
+            background-color: rgba(54, 162, 235, 0.2) !important;
+        }
+        .area-elaborazione {
+            background-color: rgba(255, 206, 86, 0.2) !important;
+        }
+        .area-tempo {
+            background-color: rgba(75, 192, 192, 0.2) !important;
+        }
+        .area-strategie {
+            background-color: rgba(153, 102, 255, 0.2) !important;
+        }
+        .area-concentrazione {
+            background-color: rgba(255, 159, 64, 0.2) !important;
+        }
+        .area-selezione {
+            background-color: rgba(199, 199, 199, 0.2) !important;
+        }
+        .area-atteggiamento {
+            background-color: rgba(83, 166, 106, 0.2) !important;
+        }
+        .area-monitoraggio {
+            background-color: rgba(209, 122, 234, 0.2) !important;
+        }
+        .area-ansia {
+            background-color: rgba(255, 99, 71, 0.2) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+        <header class="mdl-layout__header">
+            <div class="mdl-layout__header-row">
+                <i class="material-icons">table_chart</i>
+                <span class="mdl-layout-title">&nbsp;Tabella Risposte Questionario</span>
+                <div class="mdl-layout-spacer"></div>
+                <nav class="mdl-navigation">
+                    <a href="{{ url_for('admin_dashboard') }}" class="mdl-navigation__link">
+                        <i class="material-icons">dashboard</i> Dashboard
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="mdl-navigation__link">
+                        <i class="material-icons">logout</i> Logout
+                    </a>
+                </nav>
+            </div>
+        </header>
+        
+        <main class="mdl-layout__content">
+            <div class="page-content">
+                <div class="mdl-card mdl-shadow--2dp">
+                    <div class="mdl-card__title">
+                        <h2 class="mdl-card__title-text">Tabella Completa delle Risposte</h2>
+                    </div>
+                    <div class="mdl-card__supporting-text">
+                        <p>Questa tabella mostra tutte le risposte raccolte dal questionario. Utilizza i filtri per cercare dati specifici.</p>
+                        
+                        <div class="action-buttons">
+                            <a href="{{ url_for('download_excel') }}" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
+                                <i class="material-icons">file_download</i> Esporta Excel
+                            </a>
+                            
+                            <button id="toggle-columns" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+                                <i class="material-icons">visibility</i> Mostra/Nascondi Colonne
+                            </button>
+                            
+                            <div id="column-toggles" style="display: none; margin-top: 10px;">
+                                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="toggle-id">
+                                    <input type="checkbox" id="toggle-id" class="mdl-checkbox__input" checked>
+                                    <span class="mdl-checkbox__label">ID</span>
+                                </label>
+                                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="toggle-data">
+                                    <input type="checkbox" id="toggle-data" class="mdl-checkbox__input" checked>
+                                    <span class="mdl-checkbox__label">Data</span>
+                                </label>
+                                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="toggle-domande">
+                                    <input type="checkbox" id="toggle-domande" class="mdl-checkbox__input" checked>
+                                    <span class="mdl-checkbox__label">Domande (Q1-Q60)</span>
+                                </label>
+                                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="toggle-medie">
+                                    <input type="checkbox" id="toggle-medie" class="mdl-checkbox__input" checked>
+                                    <span class="mdl-checkbox__label">Medie</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="table-container">
+                            <table id="risposteTable" class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        {% for header in headers %}
+                                            <th>{{ header }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in data %}
+                                        <tr>
+                                            {% for cell in row %}
+                                                <td>{{ cell }}</td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mdl-card mdl-shadow--2dp">
+                    <div class="mdl-card__title">
+                        <h2 class="mdl-card__title-text">Legenda Domande</h2>
+                    </div>
+                    <div class="mdl-card__supporting-text">
+                        <h5>Aree Tematiche (colori)</h5>
+                        <ul class="mdl-list">
+                            <li class="mdl-list__item" style="display: inline-block; margin-right: 10px;">
+                                <span class="mdl-list__item-primary-content">
+                                    <span class="mdl-chip mdl-chip--contact area-motivazione">
+                                        <span class="mdl-chip__contact mdl-color--pink">M</span>
+                                        <span class="mdl-chip__text">MOTIVAZIONE</span>
+                                    </span>
+                                </span>
+                            </li>
+                            <li class="mdl-list__item" style="display: inline-block; margin-right: 10px;">
+                                <span class="mdl-list__item-primary-content">
+                                    <span class="mdl-chip mdl-chip--contact area-risorse">
+                                        <span class="mdl-chip__contact mdl-color--blue">R</span>
+                                        <span class="mdl-chip__text">USO DELLE RISORSE ACCADEMICHE</span>
+                                    </span>
+                                </span>
+                            </li>
+                            <li class="mdl-list__item" style="display: inline-block; margin-right: 10px;">
+                                <span class="mdl-list__item-primary-content">
+                                    <span class="mdl-chip mdl-chip--contact area-elaborazione">
+                                        <span class="mdl-chip__contact mdl-color--yellow-700">E</span>
+                                        <span class="mdl-chip__text">ELABORAZIONE DELLE INFORMAZIONI</span>
+                                    </span>
+                                </span>
+                            </li>
+                            <li class="mdl-list__item" style="display: inline-block; margin-right: 10px;">
+                                <span class="mdl-list__item-primary-content">
+                                    <span class="mdl-chip mdl-chip--contact area-tempo">
+                                        <span class="mdl-chip__contact mdl-color--teal">T</span>
+                                        <span class="mdl-chip__text">GESTIONE DEL TEMPO</span>
+                                    </span>
+                                </span>
+                            </li>
+                            <li class="mdl-list__item" style="display: inline-block; margin-right: 10px;">
+                                <span class="mdl-list__item-primary-content">
+                                    <span class="mdl-chip mdl-chip--contact area-strategie">
+                                        <span class="mdl-chip__contact mdl-color--deep-purple">S</span>
+                                        <span class="mdl-chip__text">STRATEGIE PER SVOLGERE PROVE</span>
+                                    </span>
+                                </span>
+                            </li>
+                            <li class="mdl-list__item" style="display: inline-block; margin-right: 10px;">
+                                <span class="mdl-list__item-primary-content">
+                                    <span class="mdl-chip mdl-chip--contact area-concentrazione">
+                                        <span class="mdl-chip__contact mdl-color--deep-orange">C</span>
+                                        <span class="mdl-chip__text">CONCENTRAZIONE</span>
+                                    </span>
+                                </span>
+                            </li>
+                            <li class="mdl-list__item" style="display: inline-block; margin-right: 10px;">
+                                <span class="mdl-list__item-primary-content">
+                                    <span class="mdl-chip mdl-chip--contact area-selezione">
+                                        <span class="mdl-chip__contact mdl-color--grey">S</span>
+                                        <span class="mdl-chip__text">SELEZIONE DEI CONCETTI PRINCIPALI</span>
+                                    </span>
+                                </span>
+                            </li>
+                            <li class="mdl-list__item" style="display: inline-block; margin-right: 10px;">
+                                <span class="mdl-list__item-primary-content">
+                                    <span class="mdl-chip mdl-chip--contact area-atteggiamento">
+                                        <span class="mdl-chip__contact mdl-color--light-green">A</span>
+                                        <span class="mdl-chip__text">ATTEGGIAMENTO</span>
+                                    </span>
+                                </span>
+                            </li>
+                            <li class="mdl-list__item" style="display: inline-block; margin-right: 10px;">
+                                <span class="mdl-list__item-primary-content">
+                                    <span class="mdl-chip mdl-chip--contact area-monitoraggio">
+                                        <span class="mdl-chip__contact mdl-color--purple">M</span>
+                                        <span class="mdl-chip__text">AUTO-MONITORAGGIO</span>
+                                    </span>
+                                </span>
+                            </li>
+                            <li class="mdl-list__item" style="display: inline-block; margin-right: 10px;">
+                                <span class="mdl-list__item-primary-content">
+                                    <span class="mdl-chip mdl-chip--contact area-ansia">
+                                        <span class="mdl-chip__contact mdl-color--red">A</span>
+                                        <span class="mdl-chip__text">ANSIA</span>
+                                    </span>
+                                </span>
+                            </li>
+                        </ul>
+                        
+                        <!-- Sezione Gestione Domande -->
+                        <h5>Gestione Domande</h5>
+                        <div class="action-buttons">
+                            <button id="show-add-dialog" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
+                                <i class="material-icons">add</i> Aggiungi Domanda
+                            </button>
+                        </div>
+                        <div class="domande-container" style="max-height: 500px; overflow-y: auto;">
+                            <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th class="mdl-data-table__cell--non-numeric">N°</th>
+                                        <th class="mdl-data-table__cell--non-numeric">Area</th>
+                                        <th class="mdl-data-table__cell--non-numeric">Testo Domanda</th>
+                                        <th class="mdl-data-table__cell--non-numeric">Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for domanda in domande %}
+                                        {% set area_class = "" %}
+                                        {% if "MOTIVAZIONE" in domanda.area %}
+                                            {% set area_class = "area-motivazione" %}
+                                        {% elif "RISORSE" in domanda.area %}
+                                            {% set area_class = "area-risorse" %}
+                                        {% elif "ELABORAZIONE" in domanda.area %}
+                                            {% set area_class = "area-elaborazione" %}
+                                        {% elif "TEMPO" in domanda.area %}
+                                            {% set area_class = "area-tempo" %}
+                                        {% elif "STRATEGIE" in domanda.area %}
+                                            {% set area_class = "area-strategie" %}
+                                        {% elif "CONCENTRAZIONE" in domanda.area %}
+                                            {% set area_class = "area-concentrazione" %}
+                                        {% elif "SELEZIONE" in domanda.area %}
+                                            {% set area_class = "area-selezione" %}
+                                        {% elif "ATTEGGIAMENTO" in domanda.area %}
+                                            {% set area_class = "area-atteggiamento" %}
+                                        {% elif "MONITORAGGIO" in domanda.area %}
+                                            {% set area_class = "area-monitoraggio" %}
+                                        {% elif "ANSIA" in domanda.area %}
+                                            {% set area_class = "area-ansia" %}
+                                        {% endif %}
+                                        <tr class="{{ area_class }}">
+                                            <td class="mdl-data-table__cell--non-numeric">{{ domanda.ordine }}</td>
+                                            <td class="mdl-data-table__cell--non-numeric">{{ domanda.area }}</td>
+                                            <td class="mdl-data-table__cell--non-numeric">{{ domanda.testo }}</td>
+                                            <td class="mdl-data-table__cell--non-numeric">
+                                                <button class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored" id="show-edit-dialog{{ domanda.id }}">
+                                                    <i class="material-icons">edit</i>
+                                                </button>
+                                                <form method="POST" style="display: inline;" id="deleteForm{{ domanda.id }}">
+                                                    <input type="hidden" name="azione" value="elimina_domanda">
+                                                    <input type="hidden" name="domanda_id" value="{{ domanda.id }}">
+                                                    <button type="button" class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored" onclick="confirmDelete({{ domanda.id }})">
+                                                        <i class="material-icons">delete</i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mdl-card mdl-shadow--2dp">
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modal per Aggiunta Domanda -->
+    <dialog class="mdl-dialog" id="addQuestionDialog">
+        <h4 class="mdl-dialog__title">Aggiungi Nuova Domanda</h4>
+        <div class="mdl-dialog__content">
+            <form method="POST" id="addQuestionForm">
+                <input type="hidden" name="azione" value="aggiungi_domanda">
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width: 100%;">
+                    <textarea class="mdl-textfield__input" rows="3" id="testo" name="testo" required></textarea>
+                    <label class="mdl-textfield__label" for="testo">Testo della domanda</label>
+                </div>
+                
+                <div style="display: flex; gap: 16px;">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="flex: 1;">
+                        <select class="mdl-textfield__input" id="area" name="area" required>
+                            <option value="" disabled selected>Seleziona area</option>
+                            {% for area in aree %}
+                            <option value="{{ area }}">{{ area }}</option>
+                            {% endfor %}
+                        </select>
+                        <label class="mdl-textfield__label" for="area">Area</label>
+                    </div>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="flex: 1;">
+                        <input class="mdl-textfield__input" type="number" id="ordine" name="ordine" min="1" required>
+                        <label class="mdl-textfield__label" for="ordine">Ordine</label>
+                    </div>
+                </div>
+                
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width: 100%;">
+                    <input class="mdl-textfield__input" type="text" id="etichetta" name="etichetta">
+                    <label class="mdl-textfield__label" for="etichetta">Etichetta (opzionale)</label>
+                </div>
+            </form>
+        </div>
+        <div class="mdl-dialog__actions">
+            <button type="button" class="mdl-button" id="addQuestionSubmit">Aggiungi</button>
+            <button type="button" class="mdl-button close" id="addQuestionCancel">Annulla</button>
+        </div>
+    </dialog>
+    
+    <!-- Modal per Modifica Domanda -->
+    {% for domanda in domande %}
+    <dialog class="mdl-dialog" id="editQuestionDialog{{ domanda.id }}">
+        <h4 class="mdl-dialog__title">Modifica Domanda</h4>
+        <div class="mdl-dialog__content">
+            <form method="POST" id="editQuestionForm{{ domanda.id }}">
+                <input type="hidden" name="azione" value="modifica_domanda">
+                <input type="hidden" name="domanda_id" value="{{ domanda.id }}">
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width: 100%;">
+                    <textarea class="mdl-textfield__input" rows="3" id="testo{{ domanda.id }}" name="testo" required>{{ domanda.testo }}</textarea>
+                    <label class="mdl-textfield__label" for="testo{{ domanda.id }}">Testo della domanda</label>
+                </div>
+                
+                <div style="display: flex; gap: 16px;">
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="flex: 1;">
+                        <select class="mdl-textfield__input" id="area{{ domanda.id }}" name="area" required>
+                            {% for area in aree %}
+                            <option value="{{ area }}" {% if area == domanda.area %}selected{% endif %}>{{ area }}</option>
+                            {% endfor %}
+                        </select>
+                        <label class="mdl-textfield__label" for="area{{ domanda.id }}">Area</label>
+                    </div>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="flex: 1;">
+                        <input class="mdl-textfield__input" type="number" id="ordine{{ domanda.id }}" name="ordine" min="1" value="{{ domanda.ordine }}" required>
+                        <label class="mdl-textfield__label" for="ordine{{ domanda.id }}">Ordine</label>
+                    </div>
+                </div>
+                
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width: 100%;">
+                    <input class="mdl-textfield__input" type="text" id="etichetta{{ domanda.id }}" name="etichetta" value="{{ domanda.etichetta or '' }}">
+                    <label class="mdl-textfield__label" for="etichetta{{ domanda.id }}">Etichetta (opzionale)</label>
+                </div>
+            </form>
+        </div>
+        <div class="mdl-dialog__actions">
+            <button type="button" class="mdl-button" id="editQuestionSubmit{{ domanda.id }}">Salva Modifiche</button>
+            <button type="button" class="mdl-button close" id="editQuestionCancel{{ domanda.id }}">Annulla</button>
+        </div>
+    </dialog>
+    {% endfor %}
+    
+    <script>
+        $(document).ready(function() {
+            // Prepara i dati dal backend per uso in JavaScript
+            var mappaDomande = JSON.parse('{{ mappa_domande|tojson|safe }}');
+            var areeDomande = JSON.parse('{{ aree_domande|tojson|safe }}');
+            
+            // Inizializza DataTables con opzioni avanzate
+            var table = $('#risposteTable').DataTable({
+                scrollX: true,
+                scrollY: '60vh',
+                scrollCollapse: true,
+                paging: true,
+                fixedColumns: {
+                    left: 2
+                },
+                dom: 'Bfrtip',
+                dom: 'frtip',  // Rimosso il bottone 'B' per i pulsanti di esportazione
+                language: {     // Traduzione in italiano
+                    "search": "Cerca:",
+                    "lengthMenu": "Mostra _MENU_ record per pagina",
+                    "zeroRecords": "Nessun risultato trovato",
+                    "info": "Pagina _PAGE_ di _PAGES_",
+                    "infoEmpty": "Nessun record disponibile",
+                    "infoFiltered": "(filtrato da _MAX_ record totali)",
+                    "paginate": {
+                        "first": "Primo",
+                        "last": "Ultimo",
+                        "next": "Successivo",
+                        "previous": "Precedente"
+                    }
+                }
+            });
+            
+            // Toggle per mostrare/nascondere le opzioni di colonna
+            $('#toggle-columns').click(function() {
+                $('#column-toggles').toggle();
+            });
+            
+            // Toggle per le colonne ID e Data
+            $('#toggle-id').change(function() {
+                table.column(0).visible($(this).is(':checked'));
+            });
+            
+            $('#toggle-data').change(function() {
+                table.column(1).visible($(this).is(':checked'));
+            });
+            
+            // Toggle per le colonne delle domande
+            $('#toggle-domande').change(function() {
+                var visible = $(this).is(':checked');
+                for (var i = 2; i < 62; i++) {
+                    table.column(i).visible(visible);
+                }
+            });
+            
+            // Toggle per le colonne delle medie
+            $('#toggle-medie').change(function() {
+                var visible = $(this).is(':checked');
+                for (var i = 62; i < table.columns().count(); i++) {
+                    table.column(i).visible(visible);
+                }
+            });
+            
+            // Colorazione delle intestazioni delle domande in base all'area
+            const areeColori = {
+                'MOTIVAZIONE': 'area-motivazione',
+                'USO DELLE RISORSE ACCADEMICHE': 'area-risorse',
+                'ELABORAZIONE DELLE INFORMAZIONI': 'area-elaborazione',
+                'GESTIONE DEL TEMPO': 'area-tempo',
+                'STRATEGIE PER SVOLGERE PROVE': 'area-strategie',
+                'CONCENTRAZIONE': 'area-concentrazione',
+                'SELEZIONE DEI CONCETTI PRINCIPALI': 'area-selezione',
+                'ATTEGGIAMENTO': 'area-atteggiamento',
+                'AUTO-MONITORAGGIO': 'area-monitoraggio',
+                'ANSIA': 'area-ansia'
+            };
+            
+            // Aggiungo tooltip e colori alle intestazioni delle domande
+            table.columns().every(function(index) {
+                const header = $(this.header());
+                const headerText = header.text();
+                
+                if (headerText.match(/^Q\d+$/)) {
+                    const numero = parseInt(headerText.substring(1));
+                    const testo = mappaDomande[numero];
+                    const area = areeDomande[numero];
+                    const areaClass = areeColori[area];
+                    
+                    header.html('<div class="tooltip">' + headerText + 
+                        '<span class="tooltiptext"><b>' + area + '</b><br>' + testo + '</span></div>');
+                    
+                    header.addClass(areaClass);
+                }
+            });
+            
+            // Dialog per aggiunta domanda
+            var addDialog = document.getElementById('addQuestionDialog');
+            var showDialogButton = document.getElementById('show-add-dialog');
+            if (!addDialog.showModal) {
+              dialogPolyfill.registerDialog(addDialog);
+            }
+            showDialogButton.addEventListener('click', function() {
+              addDialog.showModal();
+              componentHandler.upgradeAllRegistered();
+            });
+            document.getElementById('addQuestionCancel').addEventListener('click', function() {
+              addDialog.close();
+            });
+            document.getElementById('addQuestionSubmit').addEventListener('click', function() {
+              document.getElementById('addQuestionForm').submit();
+            });
+            
+            // Dialog per modifica domanda
+            {% for domanda in domande %}
+            var editDialog{{ domanda.id }} = document.getElementById('editQuestionDialog{{ domanda.id }}');
+            var showEditButton{{ domanda.id }} = document.getElementById('show-edit-dialog{{ domanda.id }}');
+            if (!editDialog{{ domanda.id }}.showModal) {
+              dialogPolyfill.registerDialog(editDialog{{ domanda.id }});
+            }
+            showEditButton{{ domanda.id }}.addEventListener('click', function() {
+              editDialog{{ domanda.id }}.showModal();
+              componentHandler.upgradeAllRegistered();
+            });
+            document.getElementById('editQuestionCancel{{ domanda.id }}').addEventListener('click', function() {
+              editDialog{{ domanda.id }}.close();
+            });
+            document.getElementById('editQuestionSubmit{{ domanda.id }}').addEventListener('click', function() {
+              document.getElementById('editQuestionForm{{ domanda.id }}').submit();
+            });
+            {% endfor %}
+        });
+        
+        // Conferma eliminazione
+        function confirmDelete(id) {
+            if (confirm('Sei sicuro di voler eliminare questa domanda?')) {
+                document.getElementById('deleteForm' + id).submit();
+            }
+        }
+    </script>
+</body>
+</html>

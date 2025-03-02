@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Feedback</title>
+    
+    <!-- Material Design Lite -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue-light_blue.min.css">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    
+    <style>
+        .page-content {
+            padding: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .mdl-card {
+            width: 100%;
+            min-height: 0;
+            margin-bottom: 24px;
+        }
+        
+        .mdl-card__title {
+            background-color: #1976D2;
+            color: white;
+        }
+        
+        .feedback-form {
+            padding: 24px;
+        }
+        
+        .mdl-textfield {
+            width: 100%;
+        }
+        
+        .feedback-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+        
+        .feedback-card {
+            min-height: 200px;
+        }
+        
+        .feedback-actions {
+            display: flex;
+            justify-content: flex-end;
+            padding: 8px;
+        }
+        
+        .area-select {
+            margin-right: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+        <header class="mdl-layout__header">
+            <div class="mdl-layout__header-row">
+                <i class="material-icons">feedback</i>
+                <span class="mdl-layout-title">&nbsp;Gestione Feedback</span>
+                <div class="mdl-layout-spacer"></div>
+                <nav class="mdl-navigation">
+                    <a href="{{ url_for('admin_dashboard') }}" class="mdl-navigation__link">
+                        <i class="material-icons">dashboard</i> Dashboard
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="mdl-navigation__link">
+                        <i class="material-icons">logout</i> Logout
+                    </a>
+                </nav>
+            </div>
+        </header>
+        
+        <main class="mdl-layout__content">
+            <div class="page-content">
+                <!-- Form per aggiungere/modificare feedback -->
+                <div class="mdl-card mdl-shadow--2dp">
+                    <div class="mdl-card__title">
+                        <h2 class="mdl-card__title-text">Aggiungi/Modifica Feedback</h2>
+                    </div>
+                    <div class="mdl-card__supporting-text">
+                        <form method="post" class="feedback-form">
+                            <div class="mdl-grid">
+                                <div class="mdl-cell mdl-cell--6-col">
+                                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                                        <select class="mdl-textfield__input" id="area" name="area" required>
+                                            <option value="motivazione">MOTIVAZIONE</option>
+                                            <option value="risorse">USO DELLE RISORSE ACCADEMICHE</option>
+                                            <option value="elaborazione">ELABORAZIONE DELLE INFORMAZIONI</option>
+                                            <option value="tempo">GESTIONE DEL TEMPO</option>
+                                            <option value="strategie">STRATEGIE PER SVOLGERE PROVE</option>
+                                            <option value="concentrazione">CONCENTRAZIONE</option>
+                                            <option value="selezione">SELEZIONE DEI CONCETTI PRINCIPALI</option>
+                                            <option value="atteggiamento">ATTEGGIAMENTO</option>
+                                            <option value="monitoraggio">AUTO-MONITORAGGIO</option>
+                                            <option value="ansia">ANSIA</option>
+                                        </select>
+                                        <label class="mdl-textfield__label" for="area">Area</label>
+                                    </div>
+                                </div>
+                                <div class="mdl-cell mdl-cell--6-col">
+                                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                                        <select class="mdl-textfield__input" id="livello" name="livello" required>
+                                            <option value="basso">Basso (1-2.5)</option>
+                                            <option value="medio">Medio (2.5-3.5)</option>
+                                            <option value="alto">Alto (3.5-5)</option>
+                                        </select>
+                                        <label class="mdl-textfield__label" for="livello">Livello</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mdl-textfield mdl-js-textfield">
+                                <textarea class="mdl-textfield__input" type="text" rows="4" id="testo" name="testo" required></textarea>
+                                <label class="mdl-textfield__label" for="testo">Testo del feedback...</label>
+                            </div>
+                            
+                            <div class="feedback-actions">
+                                <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
+                                    Salva Feedback
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Visualizzazione feedback esistenti -->
+                <div class="mdl-card mdl-shadow--2dp">
+                    <div class="mdl-card__title">
+                        <h2 class="mdl-card__title-text">Feedback Esistenti</h2>
+                    </div>
+                    <div class="mdl-card__supporting-text">
+                        <div class="feedback-grid">
+                            {% for f in feedback %}
+                            <div class="mdl-card mdl-shadow--2dp feedback-card">
+                                <div class="mdl-card__title">
+                                    <h2 class="mdl-card__title-text">{{ f.area.upper() }} - {{ f.livello.upper() }}</h2>
+                                </div>
+                                <div class="mdl-card__supporting-text">
+                                    {{ f.testo }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,9 @@
+flask
+Werkzeug
+flask-sqlalchemy
+flask-login
+pandas
+SQLAlchemy
+numpy
+Flask-Migrate
+openpyxl

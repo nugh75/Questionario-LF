@@ -576,6 +576,13 @@ def download_risultati(risposta_id):
     elements.append(Paragraph("Feedback per Area", heading_style))
     elements.append(Spacer(1, 10))
     
+    # Creo uno stile specifico per i feedback con allineamento a sinistra
+    feedback_style = ParagraphStyle(
+        'FeedbackStyle',
+        parent=styles['Normal'],
+        alignment=0  # 0 = sinistra in ReportLab
+    )
+    
     # Recupera i feedback per ciascuna area
     feedback_motivazione = get_feedback(risposta.media_motivazione, 'MOTIVAZIONE')
     feedback_risorse = get_feedback(risposta.media_risorse, 'USO DELLE RISORSE ACCADEMICHE')
@@ -603,7 +610,7 @@ def download_risultati(risposta_id):
     ]:
         area_style = styles['Heading3']
         elements.append(Paragraph(area, area_style))
-        elements.append(Paragraph(feedback, styles['Normal']))
+        elements.append(Paragraph(feedback, feedback_style))  # Uso il nuovo stile per i feedback
         elements.append(Spacer(1, 10))
     
     # Genera il PDF
